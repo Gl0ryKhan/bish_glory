@@ -1,0 +1,345 @@
+=== ЛУЧШИЕ РЕЗУЛЬТАТЫ НА ДАННЫЙ МОМЕНТ ===
+Лучшее значение R2: 0.9044
+Параметры:
+  iterations: 1309
+  learning_rate: 0.11522258011179227
+  depth: 7
+  l2_leaf_reg: 0.04754790550637685
+  bagging_temperature: 0.7866278717699984
+  random_strength: 0.024728395171586617
+==========================================
+
+Всего завершено шагов: 34 из 35
+
+=== Топ-10 лучших конфигураций ===
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>number</th>
+      <th>value</th>
+      <th>state</th>
+      <th>params_bagging_temperature</th>
+      <th>params_depth</th>
+      <th>params_iterations</th>
+      <th>params_l2_leaf_reg</th>
+      <th>params_learning_rate</th>
+      <th>params_random_strength</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>17</th>
+      <td>17</td>
+      <td>0.904400</td>
+      <td>COMPLETE</td>
+      <td>0.786628</td>
+      <td>7</td>
+      <td>1309</td>
+      <td>0.047548</td>
+      <td>0.115223</td>
+      <td>0.024728</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>13</td>
+      <td>0.904090</td>
+      <td>COMPLETE</td>
+      <td>0.713515</td>
+      <td>7</td>
+      <td>1455</td>
+      <td>0.092321</td>
+      <td>0.055127</td>
+      <td>0.004710</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>31</td>
+      <td>0.903471</td>
+      <td>COMPLETE</td>
+      <td>0.678872</td>
+      <td>6</td>
+      <td>1483</td>
+      <td>0.107818</td>
+      <td>0.081073</td>
+      <td>0.002733</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>16</td>
+      <td>0.903415</td>
+      <td>COMPLETE</td>
+      <td>0.787935</td>
+      <td>7</td>
+      <td>1352</td>
+      <td>0.066661</td>
+      <td>0.098331</td>
+      <td>0.016571</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>12</td>
+      <td>0.903238</td>
+      <td>COMPLETE</td>
+      <td>0.684618</td>
+      <td>6</td>
+      <td>1466</td>
+      <td>0.113440</td>
+      <td>0.077620</td>
+      <td>0.001039</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>24</td>
+      <td>0.903223</td>
+      <td>COMPLETE</td>
+      <td>0.890606</td>
+      <td>7</td>
+      <td>1489</td>
+      <td>0.026190</td>
+      <td>0.061402</td>
+      <td>0.041734</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>19</td>
+      <td>0.902721</td>
+      <td>COMPLETE</td>
+      <td>0.795482</td>
+      <td>7</td>
+      <td>1120</td>
+      <td>0.061243</td>
+      <td>0.052031</td>
+      <td>0.047953</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>10</td>
+      <td>0.902598</td>
+      <td>COMPLETE</td>
+      <td>0.660262</td>
+      <td>6</td>
+      <td>1439</td>
+      <td>0.166258</td>
+      <td>0.066910</td>
+      <td>0.001429</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>11</td>
+      <td>0.902572</td>
+      <td>COMPLETE</td>
+      <td>0.646255</td>
+      <td>6</td>
+      <td>1470</td>
+      <td>0.137662</td>
+      <td>0.083531</td>
+      <td>0.001050</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>15</td>
+      <td>0.902527</td>
+      <td>COMPLETE</td>
+      <td>0.497085</td>
+      <td>7</td>
+      <td>1240</td>
+      <td>0.093650</td>
+      <td>0.040456</td>
+      <td>0.004962</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+=== Топ-10 худших конфигураций (для понимания, какие диапазоны исключить) ===
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>number</th>
+      <th>value</th>
+      <th>state</th>
+      <th>params_bagging_temperature</th>
+      <th>params_depth</th>
+      <th>params_iterations</th>
+      <th>params_l2_leaf_reg</th>
+      <th>params_learning_rate</th>
+      <th>params_random_strength</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>9</th>
+      <td>9</td>
+      <td>0.897705</td>
+      <td>COMPLETE</td>
+      <td>0.045227</td>
+      <td>4</td>
+      <td>977</td>
+      <td>0.038721</td>
+      <td>0.229996</td>
+      <td>0.020013</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>0.897397</td>
+      <td>COMPLETE</td>
+      <td>0.020584</td>
+      <td>8</td>
+      <td>275</td>
+      <td>1.331122</td>
+      <td>0.190304</td>
+      <td>7.579480</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>0.896966</td>
+      <td>COMPLETE</td>
+      <td>0.292145</td>
+      <td>8</td>
+      <td>761</td>
+      <td>0.026211</td>
+      <td>0.026927</td>
+      <td>0.029204</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>7</td>
+      <td>0.894878</td>
+      <td>COMPLETE</td>
+      <td>0.311711</td>
+      <td>5</td>
+      <td>244</td>
+      <td>0.971778</td>
+      <td>0.220382</td>
+      <td>0.120302</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>29</td>
+      <td>0.894703</td>
+      <td>COMPLETE</td>
+      <td>0.591051</td>
+      <td>9</td>
+      <td>513</td>
+      <td>0.540473</td>
+      <td>0.297429</td>
+      <td>0.019908</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>26</td>
+      <td>0.893010</td>
+      <td>COMPLETE</td>
+      <td>0.839690</td>
+      <td>8</td>
+      <td>1233</td>
+      <td>0.092325</td>
+      <td>0.010403</td>
+      <td>0.065771</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>0.892452</td>
+      <td>COMPLETE</td>
+      <td>0.304242</td>
+      <td>5</td>
+      <td>1283</td>
+      <td>0.035499</td>
+      <td>0.020590</td>
+      <td>0.125610</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>8</td>
+      <td>0.892155</td>
+      <td>COMPLETE</td>
+      <td>0.939499</td>
+      <td>10</td>
+      <td>911</td>
+      <td>2.115429</td>
+      <td>0.018752</td>
+      <td>3.795853</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>6</td>
+      <td>0.886970</td>
+      <td>COMPLETE</td>
+      <td>0.122038</td>
+      <td>8</td>
+      <td>596</td>
+      <td>0.209150</td>
+      <td>0.013940</td>
+      <td>0.095655</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5</td>
+      <td>0.874266</td>
+      <td>COMPLETE</td>
+      <td>0.965632</td>
+      <td>4</td>
+      <td>990</td>
+      <td>7.025166</td>
+      <td>0.017860</td>
+      <td>1.712338</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+
+
+
+Почему возникли эти предупреждения?
+В ОС Windows невозможно удалить файлы (особенно динамические библиотеки .dll), которые в данный момент загружены и используются активным процессом (в вашем случае — запущенным ядром Jupyter Notebook).
+
+Во время понижения версии pip переименовал старую папку numpy в ~umpy, чтобы установить новую версию параллельно, но не смог стереть заблокированные старые файлы.
+
+Что с этим делать?
+Эти папки (начинающиеся с тильды ~) теперь лежат мертвым грузом в виртуальном окружении. Они не мешают работе кода, но занимают место, и их действительно стоит удалить.
+
+Инструкция по удалению:
+
+Остановите / перезапустите ядро Jupyter в VS Code (это освободит заблокированные файлы).
+Выполните в терминале (в корневой папке проекта bish_glory) следующую команду PowerShell для удаления остаточных папок:
+powershell
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue ".\.venv\Lib\site-packages\~umpy", ".\.venv\Lib\site-packages\~umpy.libs"
+Либо вы можете просто зайти через проводник Windows по пути c:\Users\Yoga 7i 1360p\Documents\AI_academy_courses\bish_glory\.venv\Lib\site-packages\ и вручную удалить папки ~umpy и ~umpy.libs.
