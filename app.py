@@ -63,7 +63,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<p class="main-header">🏠 Bish Glory</p>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Предсказание рыночной цены квартиры в Бишкеке · CatBoost, обучен на ~12K объявлений</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Предсказание рыночной цены квартиры в Бишкеке</p>', unsafe_allow_html=True)
 
 
 @st.cache_resource
@@ -112,16 +112,28 @@ if "lon" not in st.session_state:
 # ---------- Карта ----------
 st.markdown("### 📍 Укажите расположение квартиры на карте")
 
-quick_col, _ = st.columns([2, 3])
-with quick_col:
+quick_col1, quick_col2, quick_col3 = st.columns([2, 1, 1])
+with quick_col1:
     landmark = st.selectbox("Быстрый переход к району", ["—"] + list(LANDMARKS.keys()))
     if landmark != "—":
         st.session_state.lat, st.session_state.lon = LANDMARKS[landmark]
+with quick_col2:
+    manual_lat = st.number_input(
+        "Широта (lat)", value=float(st.session_state.lat), format="%.5f", key="lat_input"
+    )
+with quick_col3:
+    manual_lon = st.number_input(
+        "Долгота (lon)", value=float(st.session_state.lon), format="%.5f", key="lon_input"
+    )
+
+if (manual_lat, manual_lon) != (st.session_state.lat, st.session_state.lon):
+    st.session_state.lat, st.session_state.lon = manual_lat, manual_lon
+    st.rerun()
 
 m = folium.Map(
     location=[st.session_state.lat, st.session_state.lon],
     zoom_start=13,
-    tiles="CartoDB dark_matter",
+    tiles="OpenStreetMap",
 )
 folium.Marker(
     [st.session_state.lat, st.session_state.lon],
@@ -138,7 +150,7 @@ if map_data and map_data.get("last_clicked"):
         st.session_state.lat, st.session_state.lon = new_lat, new_lon
         st.rerun()
 
-st.caption(f"Выбрано: {st.session_state.lat:.5f}, {st.session_state.lon:.5f} — кликните по карте, чтобы изменить точку")
+st.caption(f"Выбрано (lat, lon): {st.session_state.lat:.5f}, {st.session_state.lon:.5f} — кликните по карте или введите вручную")
 
 st.markdown("---")
 
