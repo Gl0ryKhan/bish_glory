@@ -1,10 +1,19 @@
-import gradio as gr
+import streamlit as st
 import pandas as pd
 import numpy as np
 from catboost import CatBoostRegressor
 
-model = CatBoostRegressor()
-model.load_model("final_catboost_model.cbm")
+st.set_page_config(page_title="Bish Glory", page_icon="🏠")
+
+
+@st.cache_resource
+def load_model():
+    model = CatBoostRegressor()
+    model.load_model("final_catboost_model.cbm")
+    return model
+
+
+model = load_model()
 
 CAT_FEATURES = ["Серия", "Отопление", "Состояние", "house_type", "district"]
 
@@ -26,15 +35,34 @@ COLUMN_ORDER = [
     "district", "build_year_is_missing",
 ]
 
+st.title("🏠 Bish Glory — предсказание цены квартиры в Бишкеке")
+st.markdown("Введите параметры квартиры, модель CatBoost предскажет рыночную стоимость в USD.")
 
-def predict(
-    lat, lon, seriya, otoplenie, sostoyanie, rooms, square,
-    is_free_layout, house_type, build_year,
-    tip_predlozheniya,
-    floor, total_floors,
-    doc_ddu, doc_tech_passport, doc_red_book, doc_sale_purchase,
-    district,
-):
+col1, col2 = st.columns(2)
+
+with col1:
+    lat = st.number_input("Широта (lat)", value=42.8746, format="%.6f")
+    lon = st.number_input("Долгота (lon)", value=74.6122, format="%.6f")
+    seriya = st.selectbox("Серия", SERIYA_OPTIONS, index=SERIYA_OPTIONS.index("элитка"))
+    otoplenie = st.selectbox("Отопление", OTOPLENIE_OPTIONS, index=OTOPLENIE_OPTIONS.index("центральное"))
+    sostoyanie = st.selectbox("Состояние", SOSTOYANIE_OPTIONS, index=SOSTOYANIE_OPTIONS.index("евроремонт"))
+    rooms = st.number_input("Кол-во комнат", min_value=1, value=2, step=1)
+    square = st.number_input("Площадь (м²)", min_value=1.0, value=60.0)
+    is_free_layout = st.checkbox("Свободная планировка")
+    house_type = st.selectbox("Тип дома", HOUSE_TYPE_OPTIONS, index=HOUSE_TYPE_OPTIONS.index("монолитный"))
+
+with col2:
+    build_year = st.number_input("Год постройки (0, если неизвестен)", min_value=0, value=2015, step=1)
+    tip_predlozheniya = st.radio("Тип предложения", ["от агента", "от собственника"], index=1)
+    floor = st.number_input("Этаж квартиры", min_value=1, value=3, step=1)
+    total_floors = st.number_input("Этажность дома", min_value=1, value=9, step=1)
+    doc_ddu = st.checkbox("Есть ДДУ")
+    doc_tech_passport = st.checkbox("Есть техпаспорт")
+    doc_red_book = st.checkbox("Есть красная книга")
+    doc_sale_purchase = st.checkbox("Есть договор купли-продажи")
+    district = st.text_input("Район", value="Магистраль")
+
+if st.button("Предсказать цену", type="primary"):
     if total_floors and total_floors > 0:
         floor_ratio = floor / total_floors
     else:
@@ -80,35 +108,4 @@ def predict(
     pred_log = model.predict(X)[0]
     price_usd = np.expm1(pred_log)
 
-    return f"💰 Предсказанная цена: ${price_usd:,.0f}"
-
-
-demo = gr.Interface(
-    fn=predict,
-    inputs=[
-        gr.Number(label="Широта (lat)", value=42.8746),
-        gr.Number(label="Долгота (lon)", value=74.6122),
-        gr.Dropdown(SERIYA_OPTIONS, label="Серия", value="элитка"),
-        gr.Dropdown(OTOPLENIE_OPTIONS, label="Отопление", value="центральное"),
-        gr.Dropdown(SOSTOYANIE_OPTIONS, label="Состояние", value="евроремонт"),
-        gr.Number(label="Кол-во комнат", value=2),
-        gr.Number(label="Площадь (м²)", value=60),
-        gr.Checkbox(label="Свободная планировка"),
-        gr.Dropdown(HOUSE_TYPE_OPTIONS, label="Тип дома", value="монолитный"),
-        gr.Number(label="Год постройки (0, если неизвестен)", value=2015),
-        gr.Radio(["от агента", "от собственника"], label="Тип предложения", value="от собственника"),
-        gr.Number(label="Этаж квартиры", value=3),
-        gr.Number(label="Этажность дома", value=9),
-        gr.Checkbox(label="Есть ДДУ"),
-        gr.Checkbox(label="Есть техпаспорт"),
-        gr.Checkbox(label="Есть красная книга"),
-        gr.Checkbox(label="Есть договор купли-продажи"),
-        gr.Textbox(label="Район", value="Магистраль"),
-    ],
-    outputs=gr.Text(label="Результат"),
-    title="🏠 Bish Glory — предсказание цены квартиры в Бишкеке",
-    description="Введите параметры квартиры, модель CatBoost предскажет рыночную стоимость в USD.",
-)
-
-if __name__ == "__main__":
-    demo.launch()
+    st.success(f"💰 Предсказанная цена: ${price_usd:,.0f}")
