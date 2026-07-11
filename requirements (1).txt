@@ -1,6 +1,0 @@
-streamlit
-catboost==1.2.10
-pandas
-numpy
-folium
-streamlit-folium
