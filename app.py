@@ -50,14 +50,36 @@ st.markdown("""
         border-radius: 12px;
         padding: 10px;
     }
-    .stButton>button {
+    .stButton>button, .stFormSubmitButton>button {
         background: linear-gradient(90deg, #ff8a00, #e52e71);
         color: white;
         border: none;
         border-radius: 10px;
-        padding: 0.6rem 1.2rem;
+        padding: 0.7rem 1.2rem;
         font-weight: 700;
         width: 100%;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: 0 0 0 rgba(229, 46, 113, 0.4);
+        animation: pulse 2.5s infinite;
+    }
+    .stButton>button:hover, .stFormSubmitButton>button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(229, 46, 113, 0.6);
+    }
+    .stButton>button:active, .stFormSubmitButton>button:active {
+        transform: scale(0.98);
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 138, 0, 0.4); }
+        70% { box-shadow: 0 0 0 12px rgba(255, 138, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 138, 0, 0); }
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .price-card {
+        animation: fadeInUp 0.5s ease-out;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -155,88 +177,91 @@ st.caption(f"Выбрано (lat, lon): {st.session_state.lat:.5f}, {st.session_
 st.markdown("---")
 
 # ---------- Параметры квартиры ----------
-tab1, tab2, tab3 = st.tabs(["🏢 Квартира", "🏗️ Дом и этаж", "📄 Документы"])
+with st.form("prediction_form"):
+    tab1, tab2, tab3 = st.tabs(["🏢 Квартира", "🏗️ Дом и этаж", "📄 Документы"])
 
-with tab1:
-    c1, c2 = st.columns(2)
-    with c1:
-        seriya = st.selectbox("Серия", SERIYA_OPTIONS, index=SERIYA_OPTIONS.index("элитка"))
-        sostoyanie = st.selectbox("Состояние", SOSTOYANIE_OPTIONS, index=SOSTOYANIE_OPTIONS.index("евроремонт"))
-        rooms = st.number_input("Кол-во комнат", min_value=1, value=2, step=1)
-    with c2:
-        district = st.text_input("Район (название)", value="Магистраль")
-        otoplenie = st.selectbox("Отопление", OTOPLENIE_OPTIONS, index=OTOPLENIE_OPTIONS.index("центральное"))
-        square = st.number_input("Площадь (м²)", min_value=1.0, value=60.0)
-    is_free_layout = st.checkbox("Свободная планировка")
+    with tab1:
+        c1, c2 = st.columns(2)
+        with c1:
+            seriya = st.selectbox("Серия", SERIYA_OPTIONS, index=SERIYA_OPTIONS.index("элитка"))
+            sostoyanie = st.selectbox("Состояние", SOSTOYANIE_OPTIONS, index=SOSTOYANIE_OPTIONS.index("евроремонт"))
+            rooms = st.number_input("Кол-во комнат", min_value=1, value=2, step=1)
+        with c2:
+            district = st.text_input("Район (название)", value="Магистраль")
+            otoplenie = st.selectbox("Отопление", OTOPLENIE_OPTIONS, index=OTOPLENIE_OPTIONS.index("центральное"))
+            square = st.number_input("Площадь (м²)", min_value=1.0, value=60.0)
+        is_free_layout = st.checkbox("Свободная планировка")
 
-with tab2:
-    c1, c2 = st.columns(2)
-    with c1:
-        house_type = st.selectbox("Тип дома", HOUSE_TYPE_OPTIONS, index=HOUSE_TYPE_OPTIONS.index("монолитный"))
-        build_year = st.number_input("Год постройки (0, если неизвестен)", min_value=0, value=2015, step=1)
-    with c2:
-        floor = st.number_input("Этаж квартиры", min_value=1, value=3, step=1)
-        total_floors = st.number_input("Этажность дома", min_value=1, value=9, step=1)
-    tip_predlozheniya = st.radio("Тип предложения", ["от агента", "от собственника"], index=1, horizontal=True)
+    with tab2:
+        c1, c2 = st.columns(2)
+        with c1:
+            house_type = st.selectbox("Тип дома", HOUSE_TYPE_OPTIONS, index=HOUSE_TYPE_OPTIONS.index("монолитный"))
+            build_year = st.number_input("Год постройки (0, если неизвестен)", min_value=0, value=2015, step=1)
+        with c2:
+            floor = st.number_input("Этаж квартиры", min_value=1, value=3, step=1)
+            total_floors = st.number_input("Этажность дома", min_value=1, value=9, step=1)
+        tip_predlozheniya = st.radio("Тип предложения", ["от агента", "от собственника"], index=1, horizontal=True)
 
-with tab3:
-    c1, c2 = st.columns(2)
-    with c1:
-        doc_ddu = st.checkbox("Есть ДДУ")
-        doc_tech_passport = st.checkbox("Есть техпаспорт")
-    with c2:
-        doc_red_book = st.checkbox("Есть красная книга")
-        doc_sale_purchase = st.checkbox("Есть договор купли-продажи")
+    with tab3:
+        c1, c2 = st.columns(2)
+        with c1:
+            doc_ddu = st.checkbox("Есть ДДУ")
+            doc_tech_passport = st.checkbox("Есть техпаспорт")
+        with c2:
+            doc_red_book = st.checkbox("Есть красная книга")
+            doc_sale_purchase = st.checkbox("Есть договор купли-продажи")
 
-st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+    submitted = st.form_submit_button("💰 Предсказать цену")
 
 # ---------- Предсказание ----------
-if st.button("💰 Предсказать цену"):
-    if total_floors and total_floors > 0:
-        floor_ratio = floor / total_floors
-    else:
-        floor_ratio = np.nan
+if submitted:
+    with st.spinner("Считаем цену..."):
+        if total_floors and total_floors > 0:
+            floor_ratio = floor / total_floors
+        else:
+            floor_ratio = np.nan
 
-    is_first_floor = 1 if floor == 1 else 0
-    is_last_floor = 1 if total_floors and floor == total_floors else 0
+        is_first_floor = 1 if floor == 1 else 0
+        is_last_floor = 1 if total_floors and floor == total_floors else 0
 
-    build_year_is_missing = 1 if not build_year or build_year <= 0 else 0
-    build_year_val = np.nan if build_year_is_missing else build_year
+        build_year_is_missing = 1 if not build_year or build_year <= 0 else 0
+        build_year_val = np.nan if build_year_is_missing else build_year
 
-    ot_agenta = 1 if tip_predlozheniya == "от агента" else 0
-    ot_sobstvennika = 1 if tip_predlozheniya == "от собственника" else 0
+        ot_agenta = 1 if tip_predlozheniya == "от агента" else 0
+        ot_sobstvennika = 1 if tip_predlozheniya == "от собственника" else 0
 
-    row = {
-        "lat": st.session_state.lat,
-        "lon": st.session_state.lon,
-        "Серия": str(seriya),
-        "Отопление": str(otoplenie),
-        "Состояние": str(sostoyanie),
-        "rooms": rooms,
-        "square": square,
-        "is_free_layout": int(is_free_layout),
-        "house_type": str(house_type),
-        "build_year": build_year_val,
-        "Тип предложения_от агента": ot_agenta,
-        "Тип предложения_от собственника": ot_sobstvennika,
-        "floor_ratio": floor_ratio,
-        "is_first_floor": is_first_floor,
-        "is_last_floor": is_last_floor,
-        "doc_ddu": int(doc_ddu),
-        "doc_tech_passport": int(doc_tech_passport),
-        "doc_red_book": int(doc_red_book),
-        "doc_sale_purchase": int(doc_sale_purchase),
-        "district": str(district),
-        "build_year_is_missing": build_year_is_missing,
-    }
+        row = {
+            "lat": st.session_state.lat,
+            "lon": st.session_state.lon,
+            "Серия": str(seriya),
+            "Отопление": str(otoplenie),
+            "Состояние": str(sostoyanie),
+            "rooms": rooms,
+            "square": square,
+            "is_free_layout": int(is_free_layout),
+            "house_type": str(house_type),
+            "build_year": build_year_val,
+            "Тип предложения_от агента": ot_agenta,
+            "Тип предложения_от собственника": ot_sobstvennika,
+            "floor_ratio": floor_ratio,
+            "is_first_floor": is_first_floor,
+            "is_last_floor": is_last_floor,
+            "doc_ddu": int(doc_ddu),
+            "doc_tech_passport": int(doc_tech_passport),
+            "doc_red_book": int(doc_red_book),
+            "doc_sale_purchase": int(doc_sale_purchase),
+            "district": str(district),
+            "build_year_is_missing": build_year_is_missing,
+        }
 
-    X = pd.DataFrame([row])[COLUMN_ORDER]
-    for col in CAT_FEATURES:
-        X[col] = X[col].astype(str)
+        X = pd.DataFrame([row])[COLUMN_ORDER]
+        for col in CAT_FEATURES:
+            X[col] = X[col].astype(str)
 
-    pred_log = model.predict(X)[0]
-    price_usd = np.expm1(pred_log)
-    price_per_m2 = price_usd / square if square else 0
+        pred_log = model.predict(X)[0]
+        price_usd = np.expm1(pred_log)
+        price_per_m2 = price_usd / square if square else 0
 
     st.markdown(f"""
     <div class="price-card">
