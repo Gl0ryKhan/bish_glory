@@ -2,8 +2,68 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from catboost import CatBoostRegressor
+import folium
+from streamlit_folium import st_folium
 
-st.set_page_config(page_title="Bish Glory", page_icon="🏠")
+st.set_page_config(page_title="Bish Glory", page_icon="🏠", layout="wide")
+
+# ---------- Стили ----------
+st.markdown("""
+<style>
+    .main-header {
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #ff8a00, #e52e71);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0;
+    }
+    .subtitle {
+        color: #9a9a9a;
+        font-size: 1rem;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+    }
+    .price-card {
+        background: linear-gradient(135deg, #1f2937, #111827);
+        border: 1px solid #ff8a00;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        margin-top: 1rem;
+    }
+    .price-value {
+        font-size: 2.6rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #ff8a00, #e52e71);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .price-label {
+        color: #9a9a9a;
+        font-size: 0.95rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    div[data-testid="stMetric"] {
+        background-color: #1a1a2e;
+        border-radius: 12px;
+        padding: 10px;
+    }
+    .stButton>button {
+        background: linear-gradient(90deg, #ff8a00, #e52e71);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 700;
+        width: 100%;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<p class="main-header">🏠 Bish Glory</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Предсказание рыночной цены квартиры в Бишкеке · CatBoost, обучен на ~12K объявлений</p>', unsafe_allow_html=True)
 
 
 @st.cache_resource
@@ -25,7 +85,16 @@ OTOPLENIE_OPTIONS = ["центральное", "на газе", "не указа
 SOSTOYANIE_OPTIONS = ["евроремонт", "под самоотделку (псо)", "не указано", "хорошее", "среднее", "не достроено"]
 HOUSE_TYPE_OPTIONS = ["монолитный", "кирпичный", "панельный"]
 
-# Порядок колонок должен строго соответствовать тому, на чём обучалась модель
+# Ориентиры для быстрого позиционирования на карте (приблизительные координаты)
+LANDMARKS = {
+    "Центр (Ала-Тоо)": (42.8746, 74.6122),
+    "Восток-5": (42.8460, 74.6520),
+    "Джал": (42.8580, 74.6350),
+    "Асанбай": (42.8890, 74.6050),
+    "Аламедин-1": (42.8830, 74.6650),
+    "Filaret / Юг-2": (42.8280, 74.5980),
+}
+
 COLUMN_ORDER = [
     "lat", "lon", "Серия", "Отопление", "Состояние", "rooms", "square",
     "is_free_layout", "house_type", "build_year",
@@ -35,34 +104,82 @@ COLUMN_ORDER = [
     "district", "build_year_is_missing",
 ]
 
-st.title("🏠 Bish Glory — предсказание цены квартиры в Бишкеке")
-st.markdown("Введите параметры квартиры, модель CatBoost предскажет рыночную стоимость в USD.")
+if "lat" not in st.session_state:
+    st.session_state.lat = 42.8746
+if "lon" not in st.session_state:
+    st.session_state.lon = 74.6122
 
-col1, col2 = st.columns(2)
+# ---------- Карта ----------
+st.markdown("### 📍 Укажите расположение квартиры на карте")
 
-with col1:
-    lat = st.number_input("Широта (lat)", value=42.8746, format="%.6f")
-    lon = st.number_input("Долгота (lon)", value=74.6122, format="%.6f")
-    seriya = st.selectbox("Серия", SERIYA_OPTIONS, index=SERIYA_OPTIONS.index("элитка"))
-    otoplenie = st.selectbox("Отопление", OTOPLENIE_OPTIONS, index=OTOPLENIE_OPTIONS.index("центральное"))
-    sostoyanie = st.selectbox("Состояние", SOSTOYANIE_OPTIONS, index=SOSTOYANIE_OPTIONS.index("евроремонт"))
-    rooms = st.number_input("Кол-во комнат", min_value=1, value=2, step=1)
-    square = st.number_input("Площадь (м²)", min_value=1.0, value=60.0)
+quick_col, _ = st.columns([2, 3])
+with quick_col:
+    landmark = st.selectbox("Быстрый переход к району", ["—"] + list(LANDMARKS.keys()))
+    if landmark != "—":
+        st.session_state.lat, st.session_state.lon = LANDMARKS[landmark]
+
+m = folium.Map(
+    location=[st.session_state.lat, st.session_state.lon],
+    zoom_start=13,
+    tiles="CartoDB dark_matter",
+)
+folium.Marker(
+    [st.session_state.lat, st.session_state.lon],
+    tooltip="Ваша квартира",
+    icon=folium.Icon(color="orange", icon="home", prefix="fa"),
+).add_to(m)
+
+map_data = st_folium(m, height=420, use_container_width=True, key="map")
+
+if map_data and map_data.get("last_clicked"):
+    new_lat = map_data["last_clicked"]["lat"]
+    new_lon = map_data["last_clicked"]["lng"]
+    if (new_lat, new_lon) != (st.session_state.lat, st.session_state.lon):
+        st.session_state.lat, st.session_state.lon = new_lat, new_lon
+        st.rerun()
+
+st.caption(f"Выбрано: {st.session_state.lat:.5f}, {st.session_state.lon:.5f} — кликните по карте, чтобы изменить точку")
+
+st.markdown("---")
+
+# ---------- Параметры квартиры ----------
+tab1, tab2, tab3 = st.tabs(["🏢 Квартира", "🏗️ Дом и этаж", "📄 Документы"])
+
+with tab1:
+    c1, c2 = st.columns(2)
+    with c1:
+        seriya = st.selectbox("Серия", SERIYA_OPTIONS, index=SERIYA_OPTIONS.index("элитка"))
+        sostoyanie = st.selectbox("Состояние", SOSTOYANIE_OPTIONS, index=SOSTOYANIE_OPTIONS.index("евроремонт"))
+        rooms = st.number_input("Кол-во комнат", min_value=1, value=2, step=1)
+    with c2:
+        district = st.text_input("Район (название)", value="Магистраль")
+        otoplenie = st.selectbox("Отопление", OTOPLENIE_OPTIONS, index=OTOPLENIE_OPTIONS.index("центральное"))
+        square = st.number_input("Площадь (м²)", min_value=1.0, value=60.0)
     is_free_layout = st.checkbox("Свободная планировка")
-    house_type = st.selectbox("Тип дома", HOUSE_TYPE_OPTIONS, index=HOUSE_TYPE_OPTIONS.index("монолитный"))
 
-with col2:
-    build_year = st.number_input("Год постройки (0, если неизвестен)", min_value=0, value=2015, step=1)
-    tip_predlozheniya = st.radio("Тип предложения", ["от агента", "от собственника"], index=1)
-    floor = st.number_input("Этаж квартиры", min_value=1, value=3, step=1)
-    total_floors = st.number_input("Этажность дома", min_value=1, value=9, step=1)
-    doc_ddu = st.checkbox("Есть ДДУ")
-    doc_tech_passport = st.checkbox("Есть техпаспорт")
-    doc_red_book = st.checkbox("Есть красная книга")
-    doc_sale_purchase = st.checkbox("Есть договор купли-продажи")
-    district = st.text_input("Район", value="Магистраль")
+with tab2:
+    c1, c2 = st.columns(2)
+    with c1:
+        house_type = st.selectbox("Тип дома", HOUSE_TYPE_OPTIONS, index=HOUSE_TYPE_OPTIONS.index("монолитный"))
+        build_year = st.number_input("Год постройки (0, если неизвестен)", min_value=0, value=2015, step=1)
+    with c2:
+        floor = st.number_input("Этаж квартиры", min_value=1, value=3, step=1)
+        total_floors = st.number_input("Этажность дома", min_value=1, value=9, step=1)
+    tip_predlozheniya = st.radio("Тип предложения", ["от агента", "от собственника"], index=1, horizontal=True)
 
-if st.button("Предсказать цену", type="primary"):
+with tab3:
+    c1, c2 = st.columns(2)
+    with c1:
+        doc_ddu = st.checkbox("Есть ДДУ")
+        doc_tech_passport = st.checkbox("Есть техпаспорт")
+    with c2:
+        doc_red_book = st.checkbox("Есть красная книга")
+        doc_sale_purchase = st.checkbox("Есть договор купли-продажи")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ---------- Предсказание ----------
+if st.button("💰 Предсказать цену"):
     if total_floors and total_floors > 0:
         floor_ratio = floor / total_floors
     else:
@@ -78,8 +195,8 @@ if st.button("Предсказать цену", type="primary"):
     ot_sobstvennika = 1 if tip_predlozheniya == "от собственника" else 0
 
     row = {
-        "lat": lat,
-        "lon": lon,
+        "lat": st.session_state.lat,
+        "lon": st.session_state.lon,
         "Серия": str(seriya),
         "Отопление": str(otoplenie),
         "Состояние": str(sostoyanie),
@@ -107,5 +224,13 @@ if st.button("Предсказать цену", type="primary"):
 
     pred_log = model.predict(X)[0]
     price_usd = np.expm1(pred_log)
+    price_per_m2 = price_usd / square if square else 0
 
-    st.success(f"💰 Предсказанная цена: ${price_usd:,.0f}")
+    st.markdown(f"""
+    <div class="price-card">
+        <div class="price-label">Предсказанная рыночная цена</div>
+        <div class="price-value">${price_usd:,.0f}</div>
+        <div class="price-label">~${price_per_m2:,.0f} за м²</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.balloons()
